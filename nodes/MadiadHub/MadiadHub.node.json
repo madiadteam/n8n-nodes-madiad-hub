@@ -1,0 +1,18 @@
+{
+	"node": "n8n-nodes-madiad-hub.madiadHub",
+	"nodeVersion": "1.0",
+	"codexVersion": "1.0",
+	"categories": ["Marketing", "Communication"],
+	"resources": {
+		"credentialDocumentation": [
+			{
+				"url": "https://docs.madiad.com/authentication"
+			}
+		],
+		"primaryDocumentation": [
+			{
+				"url": "https://docs.madiad.com/integrations/n8n"
+			}
+		]
+	}
+}
