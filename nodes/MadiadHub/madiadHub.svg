@@ -1,5 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="MADIAD Hub">
-  <rect width="64" height="64" rx="14" fill="#111827"/>
-  <path d="M16 46V22l16 14 16-14v24" fill="none" stroke="#38BDF8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="32" cy="47" r="4" fill="#38BDF8"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="MADIAD">
+  <!-- The M from the MADIAD mark: geometric, flat-cut, deep sharp V. Brand red #ED1C24, sampled
+       from the logo artwork itself rather than the web UI token (#e94560), which is a different,
+       pinker red used for interface surfaces. -->
+  <path fill="#ED1C24" d="M0 100V0h24l26 58L76 0h24v100H76V34L50 92 24 34v66z"/>
 </svg>
