@@ -19,7 +19,7 @@ export class MadiadHub implements INodeType {
 		group: ['output'],
 		version: 1,
 		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Publish to every connected social platform through MADIAD Hub',
+		description: 'Publish and manage posts through the MADIAD Hub API',
 		defaults: {
 			name: 'MADIAD Hub',
 		},
@@ -83,13 +83,26 @@ export class MadiadHub implements INodeType {
 				const profiles = await fetchProfiles.call(this);
 
 				return profiles
-					.filter((profile) => typeof profile.profile_id === 'string' && profile.profile_id !== '')
-					.map((profile) => ({
+					// Guard the row itself, not just its fields. A null entry in the array threw
+					// "Cannot read properties of null" straight into the editor while someone was
+					// picking a profile - a response shape we do not control taking down the UI.
+					.filter(
+						(profile) =>
+							profile != null &&
+							typeof profile.profile_id === 'string' &&
+							profile.profile_id !== '',
+					)
+					.map((profile) => {
 						// A profile is always created with a name, but fall back to the ID rather than
-						// rendering an empty, unselectable row if one ever arrives without.
-						name: profile.friendly_name ?? (profile.profile_id as string),
-						value: profile.profile_id as string,
-					}))
+						// rendering an empty, unselectable row if one ever arrives without. `??` alone
+						// would not do it: the API returning "" is exactly the case this guards against,
+						// and an empty string is neither null nor undefined.
+						const label =
+							typeof profile.friendly_name === 'string' && profile.friendly_name.trim() !== ''
+								? profile.friendly_name
+								: (profile.profile_id as string);
+						return { name: label, value: profile.profile_id as string };
+					})
 					.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
 			},
 		},

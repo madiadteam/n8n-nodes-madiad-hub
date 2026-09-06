@@ -1,59 +1,63 @@
 {
-	"name": "n8n-nodes-madiad-hub",
-	"version": "0.1.1",
-	"description": "n8n node for MADIAD Hub — publish text, photos and video to every connected social platform from one workflow.",
-	"keywords": [
-		"n8n-community-node-package",
-		"n8n",
-		"madiad",
-		"social-media",
-		"publishing",
-		"scheduling"
-	],
-	"license": "MIT",
-	"homepage": "https://docs.madiad.com/integrations/n8n",
-	"author": {
-		"name": "MADIAD",
-		"email": "info@madiad.com"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/madiadteam/n8n-nodes-madiad-hub.git"
-	},
-	"bugs": {
-		"url": "https://github.com/madiadteam/n8n-nodes-madiad-hub/issues"
-	},
-	"engines": {
-		"node": ">=20.15"
-	},
-	"main": "index.js",
-	"scripts": {
-		"build": "n8n-node build",
-		"dev": "n8n-node dev",
-		"lint": "n8n-node lint",
-		"lint:fix": "n8n-node lint --fix",
-		"typecheck": "tsc --noEmit"
-	},
-	"files": [
-		"dist"
-	],
-	"n8n": {
-		"n8nNodesApiVersion": 1,
-		"strict": true,
-		"credentials": [
-			"dist/credentials/MadiadHubApi.credentials.js"
-		],
-		"nodes": [
-			"dist/nodes/MadiadHub/MadiadHub.node.js"
-		]
-	},
-	"devDependencies": {
-		"@n8n/node-cli": "*",
-		"eslint": "9.39.4",
-		"prettier": "3.8.3",
-		"typescript": "5.9.3"
-	},
-	"peerDependencies": {
-		"n8n-workflow": "*"
-	}
+  "name": "n8n-nodes-madiad-hub",
+  "version": "0.1.2",
+  "description": "n8n node for MADIAD Hub — publish text, photos and video to every connected social platform from one workflow.",
+  "keywords": [
+    "n8n-community-node-package",
+    "n8n",
+    "madiad",
+    "social-media",
+    "publishing",
+    "scheduling"
+  ],
+  "license": "MIT",
+  "homepage": "https://docs.madiad.com/integrations/n8n",
+  "author": {
+    "name": "MADIAD",
+    "email": "info@madiad.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/madiadteam/n8n-nodes-madiad-hub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/madiadteam/n8n-nodes-madiad-hub/issues"
+  },
+  "engines": {
+    "node": ">=20.15"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "n8n-node build",
+    "dev": "n8n-node dev",
+    "lint": "n8n-node lint",
+    "lint:fix": "n8n-node lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --test test/*.test.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "strict": true,
+    "credentials": [
+      "dist/credentials/MadiadHubApi.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/MadiadHub/MadiadHub.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@n8n/node-cli": "*",
+    "eslint": "9.39.4",
+    "prettier": "3.8.3",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "provenance": true
+  }
 }

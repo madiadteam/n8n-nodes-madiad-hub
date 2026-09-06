@@ -1,13 +1,9 @@
-# Publishes the package to npm with a provenance statement.
+# Stage a release to npm for human approval.
 #
-# Provenance is not optional: since 1 May 2026 n8n requires community nodes to be published
-# through a CI workflow that attaches one, and an unverified node cannot be installed on n8n
-# Cloud at all. Publishing by hand from a laptop produces no provenance and forfeits verification.
-#
-# Setup, once:
-#   1. Create an npm automation token with publish rights on the package.
-#   2. Add it to this repository as the secret NPM_TOKEN.
-#   3. Push a tag: git tag v0.1.0 && git push origin v0.1.0
+# The publish itself is deliberately split in two: this workflow builds, checks and STAGES the
+# tarball, then a maintainer approves it on npmjs.com with their own second factor. That keeps the
+# release reproducible (built in CI, provenance signed there) without a long-lived credential that
+# can publish on its own.
 name: publish
 
 on:
@@ -17,38 +13,40 @@ on:
 
 permissions:
   contents: read
-  id-token: write # required for npm provenance
+  id-token: write # npm provenance is signed with this
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # Actions are pinned to a commit SHA, not a moving tag. A tag can be repointed by whoever
+      # controls the action's repository, and the very next steps hold a credential that can
+      # publish this package - so "actions/checkout@v7" would mean trusting that repository forever.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      # `npm stage` needs npm 11+, and npm 12 itself requires Node >= 22.22 - hence Node 22
-      # above rather than 20.
-      - run: npm install -g npm@latest
+      # Release only from a tag, and only from a tag that is an ancestor of main. Without this a
+      # manual dispatch could stage any branch - including one opened to slip code past review -
+      # and the human approving on npm has no way to see which ref it came from.
+      - name: released ref must be a tag on main
+        run: |
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then
+            echo "This workflow releases tags only; got ${GITHUB_REF_TYPE} ${GITHUB_REF_NAME}." >&2
+            exit 1
+          fi
+          git fetch --quiet origin main
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "Tag ${GITHUB_REF_NAME} is not on main. Refusing to release it." >&2
+            exit 1
+          fi
 
-      # --ignore-scripts on purpose. The n8n dev toolchain pulls in `isolated-vm`, a native C++
-      # addon, and it fails to compile against the V8 in current Node 20 runners:
-      # "PostTaskImpl marked final, but is not virtual". Nothing we ship needs it — it is a
-      # transitive devDependency of the CLI, not of the node — so skipping install scripts builds
-      # clean. Without this the publish never gets past install.
-      - run: npm ci --ignore-scripts
-
-      - run: npm run build
-
-      - run: npm run lint
-
-      # Refuse to publish a package whose version does not match the tag that triggered it.
-      # Without this a mistyped tag ships the previous version again, silently.
-      - name: version matches the tag
-        if: startsWith(github.ref, 'refs/tags/v')
+      # The tag must match the version being released, or a mistyped tag silently ships the
+      # previous version again.
+      - name: tag matches package version
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG="$(node -p "require('./package.json').version")"
@@ -57,22 +55,32 @@ jobs:
             exit 1
           fi
 
-      # STAGE, do not publish outright.
+      # Pinned, like the actions above: `npm@latest` is a moving target that runs with the token in
+      # scope. --ignore-scripts because the n8n dev toolchain pulls in a native addon we never use
+      # and which does not build on current runners.
+      - run: npm install -g npm@12.0.2
+
+      - run: npm ci --ignore-scripts
+
+      - run: npm run build
+
+      - run: npm run lint
+
+      - run: npm test
+
+      # Check the artifact that will actually be published, not just the sources it was built from.
+      - name: inspect the tarball
+        run: npm pack --dry-run
+
+      # STAGE, do not publish outright: staging needs no second factor and so runs unattended,
+      # while the release only becomes public after a maintainer approves it on npmjs.com.
       #
-      # This account's 2FA is a passkey, which produces no 6-digit code, so `npm publish` can never
-      # satisfy the `--otp` it asks for. The escape hatch is not a smarter token: npm's own
-      # bypass-2FA checkbox on personal granular tokens has been broken since 2025-12 (npm/cli
-      # #8869, still open), and npm is retiring bypass tokens for publishing in January 2027 anyway.
-      #
-      # Staging is the supported path and it splits the act in two: CI stages without any 2FA
-      # prompt, then a human approves on npmjs.com (Staged Packages) with their own second factor.
-      # Provenance is still signed here, in CI, which is the only place that can sign it.
-      - name: stage the release for human approval
+      # DO NOT add a workflow input for a one-time password. Actions prints a step's `env:` block
+      # when the step starts, before the script runs, so a secret arriving as an input is public
+      # before `::add-mask::` can hide it. Secrets belong in repository secrets, which are masked.
+      - name: stage the release for approval
         run: npm stage publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: what to do next
-        run: |
-          echo "Staged. Approve it at https://www.npmjs.com/settings/madiad/staged-packages"
-          echo "or run: npm stage approve <stage-id>"
+      - run: echo "Staged. Approve it under Staged Packages on npmjs.com."

@@ -11,7 +11,7 @@ export const usageOperations: INodeProperties[] = [
 			{
 				name: 'Get',
 				value: 'get',
-				action: 'Get the account usage',
+				action: 'Get account usage',
 				description:
 					'Retrieve the plan, the current period and how much of each allowance is left',
 				routing: { request: { method: 'GET', url: '/usage' } },

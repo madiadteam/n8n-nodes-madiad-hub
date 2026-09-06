@@ -1,6 +1,8 @@
 # n8n-nodes-madiad-hub
 
-An [n8n](https://n8n.io) community node for [MADIAD Hub](https://hub.madiad.com) — publish text, photos and video to every social platform a brand is connected to, from one workflow step.
+[MADIAD Hub](https://hub.madiad.com) is a publishing API: one account, one key, one endpoint. You connect a brand's social accounts to a Hub profile once, and from then on a post is a single call.
+
+This is the [n8n](https://n8n.io) node for that API. It talks to `api.madiad.com` and to nothing else.
 
 [Installation](#installation) · [Credentials](#credentials) · [Operations](#operations) · [Usage](#usage) · [Resources](#resources)
 
@@ -34,7 +36,7 @@ Create a **separate key per workflow** so a leaked key can be revoked without br
 | **Retry** | Re-sends only the platforms a post failed on, reusing the media already stored |
 | **Unpublish** | Deletes a live post from Facebook, LinkedIn, Threads, X or YouTube |
 
-The **Platforms** dropdown is filtered per operation: only platforms that accept that kind of content are listed, so a request that the API would reject cannot be built by accident.
+Options that only apply to one platform appear only once that platform is selected, so the form stays short and the required ones are visible when they matter.
 
 **Options** available on the publish operations:
 

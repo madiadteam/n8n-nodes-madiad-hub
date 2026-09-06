@@ -2,3 +2,13 @@ node_modules/
 dist/
 *.tsbuildinfo
 .DS_Store
+
+# Never let a local credential or environment file reach a public repository.
+.env
+.env.*
+.npmrc
+*.tgz
+
+# Tooling output
+coverage/
+*.log
