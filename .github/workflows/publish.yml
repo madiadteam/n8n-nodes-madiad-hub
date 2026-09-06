@@ -30,6 +30,9 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
 
+      # `npm stage` needs npm 11+; Node 20 still ships npm 10.
+      - run: npm install -g npm@latest
+
       # --ignore-scripts on purpose. The n8n dev toolchain pulls in `isolated-vm`, a native C++
       # addon, and it fails to compile against the V8 in current Node 20 runners:
       # "PostTaskImpl marked final, but is not virtual". Nothing we ship needs it — it is a
@@ -53,20 +56,22 @@ jobs:
             exit 1
           fi
 
-      # DO NOT add an `otp` workflow input here. It was tried on 2026-09-06 and removed the same
-      # day, for two independent reasons:
+      # STAGE, do not publish outright.
       #
-      #   1. It leaks. Actions prints a step's `env:` block when the step STARTS, before the first
-      #      line of the script runs, so `::add-mask::` inside the script is always too late. A npm
-      #      recovery code was published verbatim into this repo's public run log that way. Anything
-      #      secret must arrive as a repository SECRET, which Actions masks on its own and never
-      #      echoes.
-      #   2. It does not work anyway. npm rejects a recovery code where an OTP is expected, and a
-      #      real authenticator code expires long before a human can dispatch a workflow with it.
+      # This account's 2FA is a passkey, which produces no 6-digit code, so `npm publish` can never
+      # satisfy the `--otp` it asks for. The escape hatch is not a smarter token: npm's own
+      # bypass-2FA checkbox on personal granular tokens has been broken since 2025-12 (npm/cli
+      # #8869, still open), and npm is retiring bypass tokens for publishing in January 2027 anyway.
       #
-      # If npm demands 2FA for writes, fix it on the ACCOUNT (turn off "require 2FA for write
-      # actions", or move to trusted publishing/OIDC), not by smuggling a code through CI.
-      - name: publish
-        run: npm publish --provenance --access public
+      # Staging is the supported path and it splits the act in two: CI stages without any 2FA
+      # prompt, then a human approves on npmjs.com (Staged Packages) with their own second factor.
+      # Provenance is still signed here, in CI, which is the only place that can sign it.
+      - name: stage the release for human approval
+        run: npm stage publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: what to do next
+        run: |
+          echo "Staged. Approve it at https://www.npmjs.com/settings/madiad/staged-packages"
+          echo "or run: npm stage approve <stage-id>"
