@@ -69,12 +69,14 @@ export const VIDEO_PLATFORMS: INodePropertyOptions[] = [
 
 /**
  * Deleting a live post is only possible where the platform's own API allows it. Everything else is
- * refused by the API with a 400, so it is left out of the dropdown.
+ * refused by the API with a 400, so it is left out of the dropdown. Threads is refused too
+ * (measured 2026-10-01). Must equal the gateway's UNPUBLISHABLE_PLATFORMS.
  */
 export const UNPUBLISH_PLATFORMS: INodePropertyOptions[] = [
 	{ name: 'Facebook', value: 'facebook' },
+	{ name: 'Google Business', value: 'google_business' },
 	{ name: 'LinkedIn', value: 'linkedin' },
-	{ name: 'Threads', value: 'threads' },
+	{ name: 'Pinterest', value: 'pinterest' },
 	{ name: 'X', value: 'x' },
 	{ name: 'YouTube', value: 'youtube' },
 ];

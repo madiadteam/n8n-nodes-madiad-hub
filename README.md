@@ -34,7 +34,7 @@ Create a **separate key per workflow** so a leaked key can be revoked without br
 | **Publish Video** | Publishes a video from a public HTTPS link |
 | **Get Status** | Reads the outcome of a post, per platform, by request ID or job ID |
 | **Retry** | Re-sends only the platforms a post failed on, reusing the media already stored |
-| **Unpublish** | Deletes a live post from Facebook, LinkedIn, Threads, X or YouTube |
+| **Unpublish** | Deletes a live post from Facebook, Google Business, LinkedIn, Pinterest, X or YouTube |
 
 Options that only apply to one platform appear only once that platform is selected, so the form stays short and the required ones are visible when they matter.
 
@@ -69,7 +69,7 @@ Options that only apply to one platform appear only once that platform is select
 
 ### Handle the response
 
-A text or photo post to fast platforms usually returns `status: "completed"` with a `results` object keyed by platform. A video is asynchronous: it returns `status: "processing"` and a `request_id`.
+Publishing is asynchronous. Most posts, text and photo included, first return `status: "processing"` and a `request_id`; only a post answered on the spot returns `status: "completed"` with a `results` object keyed by platform.
 
 A post can also partially succeed, so branch on the per-platform `success` field rather than on the top-level status alone:
 
@@ -94,7 +94,7 @@ Not every failure is worth retrying:
 
 | Status | Meaning | What the workflow should do |
 | --- | --- | --- |
-| `400` | The content or the request is wrong (caption over a platform's limit, bad URL) | Stop — retrying the same item cannot succeed |
+| `400` | The content or the request is wrong (a per-platform caption or title over that platform's limit, bad URL) | Stop — retrying the same item cannot succeed |
 | `409 platform_not_connected` | The profile has no account connected for that platform | Alert a human |
 | `409 idempotency_in_progress` | An earlier attempt with the same key is still running | Wait a few seconds, retry with the **same** key |
 | `429` | Rate limited | Back off for `Retry-After` seconds |

@@ -2,6 +2,21 @@
 
 All notable changes to this package. This project follows [semantic versioning](https://semver.org).
 
+## 0.1.3
+
+### Added
+
+- **Unpublish** now lists Pinterest and Google Business. For Google Business the post ID is the
+  full name (`accounts/…/locations/…/localPosts/…`), as returned in the publish result.
+- The Unpublish output carries `removal`: `confirmed` when the platform reported the post removed,
+  `unverified` on X and LinkedIn. Those two accept a delete for a post ID that does not exist, so
+  the API cannot tell whether a post was removed. Check the post before treating it as gone.
+
+### Fixed
+
+- **Unpublish** no longer lists Threads. The API refuses to delete a Threads post, so choosing it
+  could only return an error. Delete a Threads post in the Threads app.
+
 ## 0.1.2
 
 ### Fixed

@@ -182,7 +182,8 @@ export const postOperations: INodeProperties[] = [
 				name: 'Unpublish',
 				value: 'unpublish',
 				action: 'Unpublish post',
-				description: 'Delete a live post from the platform it was published to',
+				description:
+					'Delete a live post from the platform it was published to. The output field "removal" is "confirmed" when the platform reported the post removed, and "unverified" on X and LinkedIn, where the Hub cannot check that the post is gone.',
 				routing: { request: { method: 'POST', url: '/posts/unpublish' } },
 			},
 		],
@@ -417,7 +418,7 @@ export const postFields: INodeProperties[] = [
 		required: true,
 		placeholder: 'e.g. 12345_67890',
 		description:
-			'The platform’s own ID for the post, as returned in the publish result. This is not the request ID.',
+			'The platform’s own ID for the post, as returned in the publish result. This is not the request ID. For Google Business it is the full name: accounts/…/locations/…/localPosts/….',
 		displayOptions: { show: { resource: ['post'], operation: ['unpublish'] } },
 		routing: { request: { body: { post_id: '={{$value}}' } } },
 	},
